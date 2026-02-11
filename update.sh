@@ -1,0 +1,14 @@
+#!/bin/bash
+
+APK="app/build/outputs/apk/debug/app-debug.apk"
+
+echo "🔨 Building debug APK..."
+./gradlew assembleDebug || exit 1
+
+echo "📱 Updating app..."
+adb install -r "$APK" || exit 1
+
+echo "🚀 Launching app..."
+adb shell monkey -p com.panda.sideshelf -c android.intent.category.LAUNCHER 1
+
+echo "✅ Done."

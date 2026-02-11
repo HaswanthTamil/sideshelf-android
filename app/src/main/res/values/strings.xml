@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SideShelf</string>
+    <string name="accessibility_service_description">SideShelf requires Accessibility Service to monitor your clipboard in the background and save copied items to your shelf.</string>
 </resources>

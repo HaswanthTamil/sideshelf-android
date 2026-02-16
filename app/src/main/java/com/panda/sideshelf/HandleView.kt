@@ -14,21 +14,13 @@ class HandleView(context: Context) : View(context) {
         style = Paint.Style.FILL
     }
 
-    var onHandleClick: (() -> Unit)? = null
-
     private val rect = RectF()
     private val cornerRadius = 8f * resources.displayMetrics.density
 
-    init {
-        setOnClickListener {
-            onHandleClick?.invoke()
-        }
-    }
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        // Draw a rounded rectangle on the right edge
-        rect.set(0f, height * 0.4f, width.toFloat(), height * 0.6f)
+        // Draw a rounded rectangle filling the view
+        rect.set(0f, 0f, width.toFloat(), height.toFloat())
         canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
     }
 }

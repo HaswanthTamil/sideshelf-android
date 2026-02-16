@@ -56,24 +56,61 @@ class OverlayService : Service() {
     }
 
     private fun setupHandle() {
+        // Define handle height (e.g., 80dp)
+        val handleHeight = (80 * resources.displayMetrics.density).toInt()
+        
         handleView = HandleView(this).apply {
-            onHandleClick = {
-                showTray()
-            }
+            // We'll handle clicks manually via touch listener to distinguish from drags
         }
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            handleHeight,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            gravity = Gravity.TOP or Gravity.END // Use TOP to control Y strictly
+            x = 0
+            y = (resources.displayMetrics.heightPixels - handleHeight) / 2 // Start centered
             width = (16 * resources.displayMetrics.density).toInt()
         }
+
+        // Touch listener for dragging
+        handleView?.setOnTouchListener(object : android.view.View.OnTouchListener {
+            private var initialY = 0
+            private var initialTouchY = 0f
+            private var startClickTime: Long = 0
+
+            override fun onTouch(v: android.view.View, event: android.view.MotionEvent): Boolean {
+                when (event.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        initialY = params.y
+                        initialTouchY = event.rawY
+                        startClickTime = System.currentTimeMillis()
+                        return true
+                    }
+                    android.view.MotionEvent.ACTION_MOVE -> {
+                        val dy = (event.rawY - initialTouchY).toInt()
+                        params.y = initialY + dy
+                        windowManager.updateViewLayout(handleView, params)
+                        return true
+                    }
+                    android.view.MotionEvent.ACTION_UP -> {
+                        val clickDuration = System.currentTimeMillis() - startClickTime
+                        val dy = (event.rawY - initialTouchY).toInt()
+                        // If moved less than 10 pixels and short duration, treat as click
+                        if (Math.abs(dy) < 10 && clickDuration < 200) {
+                            showTray()
+                        }
+                        return true
+                    }
+                }
+                return false
+            }
+        })
 
         windowManager.addView(handleView, params)
     }

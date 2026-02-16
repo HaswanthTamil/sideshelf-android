@@ -60,9 +60,20 @@ class ClipboardStorage(context: Context) {
      */
     @Synchronized
     fun addItem(item: ShelfItem) {
+        // Remove existing item with same content (deduplication)
+        items.removeAll { existing ->
+            when (item) {
+                is ShelfItem.TextItem -> existing is ShelfItem.TextItem && existing.text == item.text
+                is ShelfItem.ImageItem -> existing is ShelfItem.ImageItem && existing.uri == item.uri
+            }
+        }
+
         // Add to beginning (most recent first)
         items.add(0, item)
         
+        // Remove items older than 7 days
+        cleanupExpiredItems()
+
         // Enforce max items limit
         if (items.size > MAX_ITEMS) {
             items.removeAt(items.size - 1)

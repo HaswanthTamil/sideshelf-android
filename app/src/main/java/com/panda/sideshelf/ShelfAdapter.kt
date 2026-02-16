@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
+import java.io.File
 import java.util.*
 
 /**
@@ -139,7 +140,19 @@ class ShelfAdapter(
         private fun copyUriToClipboard(uriString: String) {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val uri = Uri.parse(uriString)
-            val clip = ClipData.newUri(context.contentResolver, "SideShelf Image", uri)
+            
+            val contentUri = if (uri.scheme == "file") {
+                val file = File(uri.path!!)
+                androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
+            } else {
+                uri
+            }
+            
+            val clip = ClipData.newUri(context.contentResolver, "SideShelf Image", contentUri)
             clipboard.setPrimaryClip(clip)
         }
     }

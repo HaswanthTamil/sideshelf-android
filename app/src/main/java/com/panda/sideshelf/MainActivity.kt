@@ -34,6 +34,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        handleShareIntent(intent)
+
         setContent {
             SideShelfTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -46,6 +49,24 @@ class MainActivity : ComponentActivity() {
                         requestAccessibilityPermission = { requestAccessibilityPermission() }
                     )
                 }
+            }
+        }
+    }
+
+    private fun handleShareIntent(intent: Intent?) {
+        if (intent?.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
+            (intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM))?.let { uri ->
+                val storage = ClipboardStorage(this)
+                val item = ShelfItem.ImageItem(
+                    id = System.currentTimeMillis(),
+                    uri = uri.toString(),
+                    timestamp = System.currentTimeMillis()
+                )
+                storage.addItem(item)
+                android.widget.Toast.makeText(this, "Image added to SideShelf", android.widget.Toast.LENGTH_SHORT).show()
+                
+                // Optional: Close the activity if it was only opened for sharing
+                // finish() 
             }
         }
     }

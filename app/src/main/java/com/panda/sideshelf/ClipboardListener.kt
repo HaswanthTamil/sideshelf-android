@@ -81,18 +81,21 @@ class ClipboardListener(
         // Check for URI (image)
         val uri = item.uri
         if (uri != null) {
-            val uriString = uri.toString()
-            // Avoid duplicate consecutive URIs
-            if (uriString != lastClipUri) {
-                lastClipUri = uriString
-                lastClipText = null
-                
-                val shelfItem = ShelfItem.ImageItem(
-                    id = System.currentTimeMillis(),
-                    uri = uriString,
-                    timestamp = System.currentTimeMillis()
-                )
-                onNewItem(shelfItem)
+            val type = context.contentResolver.getType(uri)
+            if (type?.startsWith("image/") == true) {
+                val uriString = uri.toString()
+                // Avoid duplicate consecutive URIs
+                if (uriString != lastClipUri) {
+                    lastClipUri = uriString
+                    lastClipText = null
+                    
+                    val shelfItem = ShelfItem.ImageItem(
+                        id = System.currentTimeMillis(),
+                        uri = uriString,
+                        timestamp = System.currentTimeMillis()
+                    )
+                    onNewItem(shelfItem)
+                }
             }
         }
     }

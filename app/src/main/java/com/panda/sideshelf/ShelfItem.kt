@@ -21,7 +21,8 @@ sealed class ShelfItem {
      */
     data class ImageItem(
         override val id: Long,
-        val uri: String,
+        val uri: String, // Local URI
+        val sourceUri: String? = null, // Original source URI for deduplication
         override val timestamp: Long
     ) : ShelfItem()
 }

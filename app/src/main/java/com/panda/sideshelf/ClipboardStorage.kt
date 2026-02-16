@@ -158,6 +158,20 @@ class ClipboardStorage(private val context: Context) {
     }
 
     /**
+     * Clear all items and delete all local image files
+     */
+    @Synchronized
+    fun clearAll() {
+        items.forEach { item ->
+            if (item is ShelfItem.ImageItem) {
+                deleteImageFile(item.uri)
+            }
+        }
+        items.clear()
+        saveItems()
+    }
+
+    /**
      * Check if the last item matches the given content (to prevent duplicates)
      */
     @Synchronized
